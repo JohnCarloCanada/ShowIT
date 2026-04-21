@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 const Protected = ({ children }) => {
   const { user } = useAuth();
   if (!user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/auth" />;
   }
   return children;
 };

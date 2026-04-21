@@ -1,4 +1,4 @@
-import GoogleButton from "../components/GoogleButton";
+import { GoogleButton } from "../components/index";
 
 const Auth = () => {
   return (
