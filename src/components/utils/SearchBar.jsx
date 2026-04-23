@@ -8,6 +8,7 @@ const Searchbar = () => {
       <IoSearchSharp className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none" />
       <input
         type="text"
+        aria-label="Search projects"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search projects..."
