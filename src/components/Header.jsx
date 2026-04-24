@@ -15,12 +15,12 @@ const Header = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-20 flex justify-between items-center px-5 py-2">
+      <nav className="top-0 w-full z-20 flex justify-between items-center px-5 py-2">
         <span className="text-white text-2xl font-bold font-inter">ShowIT</span>
         <div className="hidden md:flex w-full items-center justify-between px-5">
           <SearchBar />
           <section className="flex gap-3 items-center justify-center">
-            <h2 className="text-white font-bold font-inter">Hello, {user.displayName}!</h2>
+            <h2 className="text-white font-bold font-inter">Hello, {user.displayName || "There"}!</h2>
             <SubmitBtn />
           </section>
         </div>

@@ -3,5 +3,6 @@ const GoogleButton = lazy(() => import("./GoogleButton"));
 const Layout = lazy(() => import("./Layout"));
 const Header = lazy(() => import("./Header"));
 const Menu = lazy(() => import("./Menu"));
+const ProjectCard = lazy(() => import("./ProjectCard"));
 
-export { GoogleButton, Layout, Header, Menu };
+export { GoogleButton, Layout, Header, Menu, ProjectCard };

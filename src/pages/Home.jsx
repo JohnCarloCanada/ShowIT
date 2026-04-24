@@ -1,6 +1,7 @@
 import React, { use } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ProjectCard } from "../components";
 
 const Home = () => {
   const { logout } = useAuth();
@@ -16,11 +17,9 @@ const Home = () => {
   };
 
   return (
-    <>
-      <section className="h-screen flex flex-col items-center justify-center gap-2 text-amber-50 font-bold">
-        Home
-      </section>
-    </>
+    <section className="w-full bg-[#1b1b1f] overflow-y-auto grid gap-1 min-h-[calc(100vh-65px)] grid-cols-1 sm:grid-cols-3 md:grid-cols-5 grid-rows-3 justify-items-center pt-2 px-5">
+      <ProjectCard />
+    </section>
   );
 };
 
