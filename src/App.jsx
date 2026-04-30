@@ -3,7 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Protected from "./protected/Protected.jsx";
 import { CrudProvider } from "./context/CrudContext.jsx";
 import { Auth, Home } from "./pages/index.js";
-import { Layout } from "./components/index.js";
+import { Layout, Loader } from "./components/index.js";
 import { Suspense } from "react";
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
     <main className="h-screen bg-[#1b1b1f] relative">
       <CrudProvider>
         <AuthProvider>
-          <Suspense fallback={<p>Loading.....</p>}>
+          <Suspense fallback={<Loader />}>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Layout />}>

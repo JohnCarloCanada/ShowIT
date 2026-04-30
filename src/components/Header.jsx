@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoCloseSharp } from "react-icons/io5";
-import { Menu } from ".";
+import { Logout, Menu } from ".";
 import { SearchBar, SubmitBtn } from "./utils";
 import { useAuth } from "../context/AuthContext";
 
@@ -13,6 +13,8 @@ const Header = () => {
     setNav((curr) => !curr);
   };
 
+  const displayedName = user?.displayName?.split(" ")[0] || "There";
+
   return (
     <>
       <nav className="top-0 w-full z-20 flex justify-between items-center px-5 py-2">
@@ -20,8 +22,9 @@ const Header = () => {
         <div className="hidden md:flex w-full items-center justify-between px-5">
           <SearchBar />
           <section className="flex gap-3 items-center justify-center">
-            <h2 className="text-white font-bold font-inter">Hello, {user.displayName || "There"}!</h2>
+            <h2 className="text-white font-bold font-inter">Hello, {displayedName}!</h2>
             <SubmitBtn />
+            <Logout />
           </section>
         </div>
         {nav ? (

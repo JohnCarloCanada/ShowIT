@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { SearchBar, SubmitBtn } from "./utils";
+import { Logout } from ".";
 
 const Menu = ({ nav }) => {
   return (
@@ -15,6 +16,7 @@ const Menu = ({ nav }) => {
       <section className="flex-1 flex items-center flex-col justify-center gap-2">
         <h2 className="text-white font-bold font-inter">Hello, John!</h2>
         <SubmitBtn />
+        <Logout />
       </section>
     </section>
   );

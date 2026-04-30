@@ -19,6 +19,10 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
     }));
   };
 
+  /**
+   * The handleTechStack function toggles the presence of a technology in a form data's techStack
+   * array.
+   */
   const handleTechStack = (tech) => {
     setFormData((prev) => ({
       ...prev,
@@ -83,7 +87,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
                 className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500"
                 aria-describedby="project-title-hint"
               />
-              <p id="project-title-hint" className="hidden">
+              <p id="project-title-hint" className="sr-only">
                 Enter a descriptive title for your project
               </p>
             </div>
@@ -114,6 +118,9 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
                   );
                 })}
               </div>
+              <p className="text-xs text-gray-500 mt-2 font-inter">
+                Selected: {formData.techStack.length === 0 ? "None" : formData.techStack.join(", ")}
+              </p>
             </div>
 
             {/* Project URL */}
