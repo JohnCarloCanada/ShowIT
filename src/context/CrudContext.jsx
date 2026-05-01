@@ -10,6 +10,13 @@ const CrudProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
+  /**
+   * The `submitPost` function in JavaScript React handles submitting a new post with user
+   * authentication and user document validation.
+   * @returns The `submitPost` function returns nothing (`undefined`) if the user is not authenticated
+   * or if the user document is not found. If the function successfully adds a new post to the
+   * database, it does not explicitly return anything.
+   */
   const submitPost = async (data) => {
     if (!user?.uid) {
       console.error("User not authenticated");
