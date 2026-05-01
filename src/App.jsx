@@ -9,8 +9,8 @@ import { Suspense } from "react";
 function App() {
   return (
     <main className="h-screen bg-[#1b1b1f] relative">
-      <CrudProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <CrudProvider>
           <Suspense fallback={<Loader />}>
             <Routes>
               <Route path="/auth" element={<Auth />} />
@@ -26,8 +26,8 @@ function App() {
               </Route>
             </Routes>
           </Suspense>
-        </AuthProvider>
-      </CrudProvider>
+        </CrudProvider>
+      </AuthProvider>
     </main>
   );
 }

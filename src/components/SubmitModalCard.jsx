@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
+import { useForm } from "react-hook-form";
+import { useCrud } from "../context/CrudContext";
 
 const SubmitModalCard = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -9,15 +11,17 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
     briefDescription: "",
   });
 
-  const techStackOptions = ["React", "Firebase", "Python", "JavaScript", "TypeScript", "Node.js", "Vue", "Angular"];
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm();
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const { submitPost } = useCrud();
+
+  const techStackOptions = ["React", "Firebase", "Python", "JavaScript", "TypeScript", "Node.js", "Vue", "Angular"];
 
   /**
    * The handleTechStack function toggles the presence of a technology in a form data's techStack
@@ -31,12 +35,13 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      projectTitle: "",
-      techStack: [],
-      projectURL: "",
-      briefDescription: "",
-    });
+    reset();
+    onClose();
+  };
+
+  const onSubmit = async (data) => {
+    const result = await submitPost({ ...data, techStack: [...formData.techStack] });
+    reset();
     onClose();
   };
 
@@ -71,7 +76,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
           </div>
 
           {/* Form */}
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Project Title */}
             <div>
               <label htmlFor="project-title" className="block text-sm font-medium text-gray-300 mb-2 font-inter">
@@ -81,12 +86,12 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
                 id="project-title"
                 name="projectTitle"
                 type="text"
-                value={formData.projectTitle}
-                onChange={handleInputChange}
                 placeholder="e.g., Aero Dashboard Pro"
                 className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500"
                 aria-describedby="project-title-hint"
+                {...register("projectTitle", { required: "Project Title is required" })}
               />
+              {errors.projectTitle && <span>{errors.projectTitle.message}</span>}
               <p id="project-title-hint" className="sr-only">
                 Enter a descriptive title for your project
               </p>
@@ -132,13 +137,19 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
                 id="project-url"
                 name="projectURL"
                 type="url"
-                value={formData.projectURL}
-                onChange={handleInputChange}
                 placeholder="https://yourproject.com"
                 className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500"
                 aria-describedby="project-url-hint"
+                {...register("projectURL", {
+                  required: "Project URL is required",
+                  pattern: {
+                    value: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+                    message: "Must start https/http",
+                  },
+                })}
               />
-              <p id="project-url-hint" className="hidden">
+              {errors.projectURL && <span>{errors.projectURL.message}</span>}
+              <p id="project-url-hint" className="sr-only">
                 Enter the live URL of your project
               </p>
             </div>
@@ -151,14 +162,15 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
               <textarea
                 id="brief-description"
                 name="briefDescription"
-                value={formData.briefDescription}
-                onChange={handleInputChange}
                 placeholder="A short summary of your project..."
                 rows="4"
                 className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500 resize-none"
                 aria-describedby="description-hint"
+                {...register("briefDescription", {
+                  required: "Description is required",
+                })}
               />
-              <p id="description-hint" className="hidden">
+              <p id="description-hint" className="sr-only">
                 Provide a brief description of what your project does
               </p>
             </div>
@@ -174,7 +186,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
                 Cancel
               </button>
               <button
-                type="button"
+                type="submit"
                 className="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-purple-500 text-white font-bold font-inter hover:from-purple-700 hover:to-purple-600 active:from-purple-800 active:to-purple-700 transition-all duration-200 shadow-lg"
                 aria-label="Publish project"
               >
