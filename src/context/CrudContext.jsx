@@ -1,5 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { collection, addDoc, serverTimestamp, doc, getDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../db/firebase";
 import { useAuth } from "./AuthContext";
 
@@ -8,6 +18,7 @@ const CrudContext = createContext(null);
 const CrudProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
 
   /**
@@ -31,6 +42,8 @@ const CrudProvider = ({ children }) => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const newPost = {
       ...data,
       createdAt: serverTimestamp(),
@@ -38,7 +51,16 @@ const CrudProvider = ({ children }) => {
       userName: userSnapshot.data().name,
     };
 
-    const docRef = await addDoc(collection(db, "posts"), newPost);
+    try {
+      await addDoc(collection(db, "posts"), newPost);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deletePost = async (postId) => {
+    const postDocRef = doc(db, "posts", postId);
+    await deleteDoc(postDocRef);
   };
 
   useEffect(() => {
@@ -56,7 +78,11 @@ const CrudProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  return <CrudContext.Provider value={{ submitPost, posts, loading }}>{children}</CrudContext.Provider>;
+  return (
+    <CrudContext.Provider value={{ submitPost, posts, loading, deletePost, isSubmitting }}>
+      {children}
+    </CrudContext.Provider>
+  );
 };
 
 const useCrud = () => {

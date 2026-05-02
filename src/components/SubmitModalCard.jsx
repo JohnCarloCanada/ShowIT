@@ -19,7 +19,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm();
 
-  const { submitPost } = useCrud();
+  const { submitPost, isSubmitting } = useCrud();
 
   const techStackOptions = ["React", "Firebase", "Python", "JavaScript", "TypeScript", "Node.js", "Vue", "Angular"];
 
@@ -40,9 +40,13 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
   };
 
   const onSubmit = async (data) => {
-    const result = await submitPost({ ...data, techStack: [...formData.techStack] });
-    reset();
-    onClose();
+    try {
+      await submitPost({ ...data, techStack: [...formData.techStack] });
+      reset();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (!isOpen) return null;
@@ -187,10 +191,11 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-purple-500 text-white font-bold font-inter hover:from-purple-700 hover:to-purple-600 active:from-purple-800 active:to-purple-700 transition-all duration-200 shadow-lg"
+                disabled={isSubmitting}
+                className="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-purple-500 text-white font-bold font-inter hover:from-purple-700 hover:to-purple-600 active:from-purple-800 active:to-purple-700 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Publish project"
               >
-                Publish Project
+                {isSubmitting ? "Submitting" : "Publish Project"}
               </button>
             </div>
           </form>

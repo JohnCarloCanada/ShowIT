@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaArrowUp, FaComment } from "react-icons/fa";
 import { Pill } from "./utils";
+import PostOptionsModal from "./PostOptionsModal";
 
-const ProjectCard = ({ projectTitle, projectUrl, techStack }) => {
+const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
-    <article className="w-full max-w-75 flex flex-col p-3 items-center justify-center bg-[#28303d] rounded-2xl">
+    <article className="w-full max-w-75 flex flex-col p-3 items-center justify-center bg-[#28303d] rounded-2xl relative">
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors text-2xl z-10"
+      >
+        ⋮
+      </button>
       <img className="rounded-2xl" src={`https://s.wordpress.com/mshots/v1/${projectUrl}/?w=800`} alt="Project" />
       <h3 className="font-inter text-amber-50 self-start pt-1 font-normal">{projectTitle}</h3>
       <div className="flex gap-2 items-center justify-center self-start pt-1">
@@ -22,6 +31,8 @@ const ProjectCard = ({ projectTitle, projectUrl, techStack }) => {
           <p>15</p>
         </button>
       </div>
+
+      <PostOptionsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} postId={postId} userId={userId} />
     </article>
   );
 };

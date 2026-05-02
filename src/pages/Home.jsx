@@ -29,6 +29,8 @@ const Home = () => {
               projectTitle={post.projectTitle}
               projectUrl={post.projectURL}
               techStack={post.techStack}
+              postId={post.id}
+              userId={post.userId}
             />
           );
         })}
