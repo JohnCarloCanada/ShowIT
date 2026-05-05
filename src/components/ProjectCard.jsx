@@ -10,7 +10,7 @@ const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId }) =>
     <article className="w-full max-w-75 flex flex-col p-3 items-center justify-center bg-[#28303d] rounded-2xl relative">
       <button
         onClick={() => setIsModalOpen(true)}
-        className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors text-2xl z-10"
+        className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors text-2xl"
       >
         ⋮
       </button>

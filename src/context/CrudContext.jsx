@@ -71,6 +71,7 @@ const CrudProvider = ({ children }) => {
         id: doc.id,
         ...doc.data(),
       }));
+
       setPosts(data);
       setLoading(false);
     });

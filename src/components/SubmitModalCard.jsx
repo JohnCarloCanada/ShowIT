@@ -5,10 +5,7 @@ import { useCrud } from "../context/CrudContext";
 
 const SubmitModalCard = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    projectTitle: "",
     techStack: [],
-    projectURL: "",
-    briefDescription: "",
   });
 
   const {
@@ -36,6 +33,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
 
   const handleCancel = () => {
     reset();
+    setFormData((prev) => ({ ...prev, techStack: [] }));
     onClose();
   };
 
