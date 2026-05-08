@@ -9,6 +9,7 @@ import {
   query,
   orderBy,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../db/firebase";
 import { useAuth } from "./AuthContext";
@@ -63,6 +64,49 @@ const CrudProvider = ({ children }) => {
     await deleteDoc(postDocRef);
   };
 
+  const getPost = (id) => {
+    const post = posts.filter((post) => post.id === id);
+
+    if (!user?.uid) return null;
+    if (user?.uid !== post[0].userId) {
+      return null;
+    }
+
+    return { ...post[0] };
+  };
+
+  const updatePost = async (data) => {
+    if (!user?.uid) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    const userDocRef = doc(db, "users", user.uid);
+    const userSnapshot = await getDoc(userDocRef);
+
+    if (!userSnapshot.exists()) {
+      console.error("User document not found");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const updatePost = {
+      briefDescription: data.briefDescription,
+      projectTitle: data.projectTitle,
+      projectURL: data.projectURL,
+      techStack: data.techStack,
+      updatedAt: new Date(),
+    };
+
+    try {
+      const postRef = doc(db, "posts", data.postId);
+      await updateDoc(postRef, updatePost);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
 
@@ -80,7 +124,7 @@ const CrudProvider = ({ children }) => {
   }, []);
 
   return (
-    <CrudContext.Provider value={{ submitPost, posts, loading, deletePost, isSubmitting }}>
+    <CrudContext.Provider value={{ submitPost, posts, loading, deletePost, isSubmitting, getPost, updatePost }}>
       {children}
     </CrudContext.Provider>
   );

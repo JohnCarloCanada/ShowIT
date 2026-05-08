@@ -7,5 +7,6 @@ const ProjectCard = lazy(() => import("./ProjectCard"));
 const SubmitModalCard = lazy(() => import("./SubmitModalCard"));
 const Loader = lazy(() => import("./Loader"));
 const Logout = lazy(() => import("./Logout"));
+const EditModalCard = lazy(() => import("./EditModalCard"));
 
-export { GoogleButton, Layout, Header, Menu, ProjectCard, SubmitModalCard, Loader, Logout };
+export { GoogleButton, Layout, Header, Menu, ProjectCard, SubmitModalCard, Loader, Logout, EditModalCard };
