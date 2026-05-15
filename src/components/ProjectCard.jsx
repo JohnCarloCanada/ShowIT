@@ -104,9 +104,7 @@ const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId, like
         <button
           onClick={handleUpvote}
           className={`cursor-pointer flex items-center gap-2 px-4 rounded-full font-medium transition-colors ${
-            isUserLiked
-              ? "bg-purple-600 text-white"
-              : "bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800"
+            isUserLiked ? "bg-purple-600 text-white" : "bg-[#323943] text-gray-300 hover:bg-[#3d474f]"
           }`}
         >
           <FaArrowUp />

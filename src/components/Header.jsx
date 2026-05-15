@@ -28,11 +28,11 @@ const Header = () => {
           </section>
         </div>
         {nav ? (
-          <button onClick={handleNav} className="md:hidden z-10 right-0 cursor-pointer">
+          <button onClick={handleNav} className="md:hidden z-20 right-0 cursor-pointer">
             <IoCloseSharp size={24} />
           </button>
         ) : (
-          <button onClick={handleNav} className="md:hidden flex z-10 right-0 cursor-pointer">
+          <button onClick={handleNav} className="md:hidden flex z-20 right-0 cursor-pointer">
             <GiHamburgerMenu size={24} />
           </button>
         )}
