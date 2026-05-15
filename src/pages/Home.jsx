@@ -31,6 +31,7 @@ const Home = () => {
               techStack={post.techStack}
               postId={post.id}
               userId={post.userId}
+              likeCount={post.likeCount}
             />
           );
         })}

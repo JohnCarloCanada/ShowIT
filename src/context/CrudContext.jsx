@@ -10,6 +10,8 @@ import {
   orderBy,
   deleteDoc,
   updateDoc,
+  runTransaction,
+  increment,
 } from "firebase/firestore";
 import { db } from "../db/firebase";
 import { useAuth } from "./AuthContext";
@@ -50,6 +52,8 @@ const CrudProvider = ({ children }) => {
       createdAt: serverTimestamp(),
       userId: user.uid,
       userName: userSnapshot.data().name,
+      likeCount: 0,
+      userLikes: [],
     };
 
     try {
@@ -107,6 +111,42 @@ const CrudProvider = ({ children }) => {
     }
   };
 
+  const toggleUpvote = async (postId, userId) => {
+    if (!user?.uid) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    const postRef = doc(db, "posts", postId);
+    const likeRef = doc(db, "posts", postId, "likes", userId);
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const postDoc = await transaction.get(postRef);
+        const likeDoc = await transaction.get(likeRef);
+        const userLikes = postDoc.data()?.userLikes || [];
+
+        if (likeDoc.exists()) {
+          // 1. If like exists, remove it (Unlike)
+          transaction.delete(likeRef);
+          transaction.update(postRef, {
+            likeCount: increment(-1),
+            userLikes: userLikes.filter((uid) => uid !== userId),
+          });
+        } else {
+          // 2. If it doesn't exist, add it (Like)
+          transaction.set(likeRef, { createdAt: new Date(), userName: user?.displayName?.split(" ")[0] });
+          transaction.update(postRef, {
+            likeCount: increment(1),
+            userLikes: [...userLikes, userId],
+          });
+        }
+      });
+    } catch (e) {
+      console.error("Transaction failed: ", e);
+    }
+  };
+
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
 
@@ -123,8 +163,26 @@ const CrudProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  const checkIfUserLiked = (postId) => {
+    if (!user?.uid) return false;
+    const post = posts.find((p) => p.id === postId);
+    return post?.userLikes?.includes(user.uid) || false;
+  };
+
   return (
-    <CrudContext.Provider value={{ submitPost, posts, loading, deletePost, isSubmitting, getPost, updatePost }}>
+    <CrudContext.Provider
+      value={{
+        submitPost,
+        posts,
+        loading,
+        deletePost,
+        isSubmitting,
+        getPost,
+        updatePost,
+        toggleUpvote,
+        checkIfUserLiked,
+      }}
+    >
       {children}
     </CrudContext.Provider>
   );

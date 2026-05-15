@@ -22,7 +22,10 @@ const PostOptionsModal = ({ isOpen, onClose, postId, userId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={(e) => {
+      e.stopPropagation();
+      onClose();  
+    }}>
       <div className="bg-[#28303d] rounded-lg shadow-2xl min-w-64 overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {isOwner && (
           <>

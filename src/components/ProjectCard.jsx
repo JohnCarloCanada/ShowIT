@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { FaArrowUp, FaComment } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useCrud } from "../context/CrudContext";
+import { useAuth } from "../context/AuthContext";
 import { Pill } from "./utils";
 import PostOptionsModal from "./PostOptionsModal";
 
@@ -61,14 +64,36 @@ const TechStackDisplay = ({ techStack }) => {
   );
 };
 
-const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId }) => {
+const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId, likeCount }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toggleUpvote, checkIfUserLiked } = useCrud();
+  const { user } = useAuth();
+
+  const isUserLiked = checkIfUserLiked(postId);
+
+  const handleCardClick = (e) => {
+    if (e.target.closest("button")) return;
+    navigate(`/post/${postId}`);
+  };
+
+  const handleUpvote = async (e) => {
+    e.stopPropagation();
+    if (!user?.uid) {
+      console.error("User not authenticated");
+      return;
+    }
+    await toggleUpvote(postId, user.uid);
+  };
 
   return (
-    <article className="w-full max-w-75 flex flex-col p-3 items-center justify-center bg-[#28303d] rounded-2xl relative">
+    <article
+      onClick={handleCardClick}
+      className="w-full max-w-75 flex flex-col p-3 items-center justify-center bg-[#28303d] rounded-2xl relative cursor-pointer hover:bg-[#323943] transition-colors"
+    >
       <button
         onClick={() => setIsModalOpen(true)}
-        className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors text-2xl"
+        className="cursor-pointer absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors text-2xl z-10"
       >
         ⋮
       </button>
@@ -76,9 +101,16 @@ const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId }) =>
       <h3 className="font-inter text-amber-50 self-start pt-1 font-normal">{projectTitle}</h3>
       <TechStackDisplay techStack={techStack} />
       <div className="w-full flex items-center justify-between pt-3">
-        <button className="cursor-pointer flex items-center gap-2 px-4  rounded-full bg-purple-600 text-white font-medium hover:bg-purple-700 active:bg-purple-800 transition-colors">
+        <button
+          onClick={handleUpvote}
+          className={`cursor-pointer flex items-center gap-2 px-4 rounded-full font-medium transition-colors ${
+            isUserLiked
+              ? "bg-purple-600 text-white"
+              : "bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800"
+          }`}
+        >
           <FaArrowUp />
-          <p>245</p>
+          <p>{likeCount || 0}</p>
         </button>
         <button className="cursor-pointer flex items-center gap-2 text-gray-400">
           <FaComment />
