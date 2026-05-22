@@ -12,6 +12,7 @@ import {
   updateDoc,
   runTransaction,
   increment,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../db/firebase";
 import { useAuth } from "./AuthContext";
@@ -20,6 +21,7 @@ const CrudContext = createContext(null);
 
 const CrudProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
@@ -51,9 +53,10 @@ const CrudProvider = ({ children }) => {
       ...data,
       createdAt: serverTimestamp(),
       userId: user.uid,
-      userName: userSnapshot.data().name,
+      userName: userSnapshot.data().name.split(" ")[0],
       likeCount: 0,
       userLikes: [],
+      commentCount: 0,
     };
 
     try {
@@ -147,6 +150,37 @@ const CrudProvider = ({ children }) => {
     }
   };
 
+  const handleComment = async (postId, commentData) => {
+    if (!user?.uid) return;
+
+    if (!commentData.trim()) return;
+
+    const batch = writeBatch(db);
+
+    // 1. Reference the "comments" sub-collection folder
+    const commentsRef = collection(db, "posts", postId, "comments");
+
+    // 2. Generate a new document reference with an auto-ID
+    const newCommentRef = doc(commentsRef);
+
+    // 3. Queue up the new comment data
+    batch.set(newCommentRef, {
+      text: commentData,
+      userId: user.uid,
+      userName: user?.displayName?.split(" ")[0],
+      createdAt: serverTimestamp(),
+    });
+
+    // 4. Queue up the increment on the parent post doc
+    const postRef = doc(db, "posts", postId);
+    batch.update(postRef, {
+      commentCount: increment(1),
+    });
+
+    // 5. Commit both operations to the server simultaneously
+    await batch.commit();
+  };
+
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
 
@@ -169,6 +203,23 @@ const CrudProvider = ({ children }) => {
     return post?.userLikes?.includes(user.uid) || false;
   };
 
+  const getCommentsForPost = (postId) => {
+    const q = query(
+      collection(db, "posts", postId, "comments"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const commentsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComments(commentsData);
+    });
+
+    return unsubscribe;
+  };
+
   return (
     <CrudContext.Provider
       value={{
@@ -181,6 +232,9 @@ const CrudProvider = ({ children }) => {
         updatePost,
         toggleUpvote,
         checkIfUserLiked,
+        handleComment,
+        getCommentsForPost,
+        comments,
       }}
     >
       {children}

@@ -1,18 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowUp, FaComment, FaArrowLeft } from "react-icons/fa";
 import { useCrud } from "../context/CrudContext";
 import { useAuth } from "../context/AuthContext";
-
+import { useForm } from "react-hook-form";
 import CommentCard from "../components/CommentCard";
 import { Pill } from "../components/utils";
 
 const PostDetail = () => {
+  const { register, handleSubmit, reset } = useForm();
+
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { posts, toggleUpvote, checkIfUserLiked } = useCrud();
+  const { posts, toggleUpvote, checkIfUserLiked, handleComment, getCommentsForPost, comments } = useCrud();
   const { user } = useAuth();
-  const [commentText, setCommentText] = useState("");
+
+  // Fetch comments for this post on component mount
+  useEffect(() => {
+    const unsubscribe = getCommentsForPost(postId);
+    return () => unsubscribe?.();
+  }, [postId, getCommentsForPost]);
 
   const post = posts.find((p) => p.id === postId);
   const isUserLiked = post && checkIfUserLiked(postId);
@@ -41,20 +48,12 @@ const PostDetail = () => {
     await toggleUpvote(postId, user.uid);
   };
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (commentText.trim()) {
-      const newComment = {
-        id: `c${Date.now()}`,
-        userName: "You",
-        userImage: "https://i.pravatar.cc/150?img=0",
-        content: commentText,
-        timestamp: "just now",
-        upvotes: 0,
-        replies: [],
-      };
-      setComments([newComment, ...comments]);
-      setCommentText("");
+  const onSubmit = async (data) => {
+    try {
+      await handleComment(postId, data.commentText);
+      reset(); // Reset the form after successful submission
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -134,7 +133,7 @@ const PostDetail = () => {
               </button>
               <div className="flex items-center gap-2 text-gray-300">
                 <FaComment />
-                <span>0 Comments</span>
+                <span>{post.commentCount || 0} Comments</span>
               </div>
             </div>
           </div>
@@ -145,7 +144,7 @@ const PostDetail = () => {
           <h2 className="text-xl font-semibold text-amber-50 mb-6">Comments</h2>
 
           {/* Comment Input */}
-          <form onSubmit={handleCommentSubmit} className="mb-6 pb-6 border-b border-[#323943]">
+          <form onSubmit={handleSubmit(onSubmit)} className="mb-6 pb-6 border-b border-[#323943]">
             <div className="flex gap-4">
               <img
                 src="https://i.pravatar.cc/150?img=0"
@@ -154,16 +153,14 @@ const PostDetail = () => {
               />
               <div className="flex-1">
                 <textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Share your thoughts..."
                   className="w-full bg-[#1b1b1f] text-gray-300 placeholder-gray-600 rounded-lg p-3 border border-[#323943] focus:outline-none focus:border-purple-500 resize-none"
                   rows="3"
+                  {...register("commentText", { required: true })}
                 />
                 <div className="flex justify-end mt-2">
                   <button
                     type="submit"
-                    disabled={!commentText.trim()}
                     className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   >
                     Comment
@@ -175,7 +172,11 @@ const PostDetail = () => {
 
           {/* Comments List */}
           <div className="space-y-4">
-            <p className="text-gray-500 text-center py-8">No comments yet. Be the first!</p>
+            {comments.length > 0 ? (
+              comments.map((comment) => <CommentCard key={comment.id} comment={comment} />)
+            ) : (
+              <p className="text-gray-500 text-center py-8">No comments yet. Be the first!</p>
+            )}
           </div>
         </div>
       </div>
