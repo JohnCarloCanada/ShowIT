@@ -41,6 +41,7 @@ const SubmitModalCard = ({ isOpen, onClose }) => {
     try {
       await submitPost({ ...data, techStack: [...formData.techStack] });
       reset();
+      setFormData((prev) => ({ ...prev, techStack: [] }));
       onClose();
     } catch (err) {
       console.error(err);

@@ -11,7 +11,7 @@ function App() {
     <main className="h-screen bg-[#1b1b1f] relative">
       <AuthProvider>
         <CrudProvider>
-          <Suspense fallback={<Loader />}>
+          <Suspense>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Layout />}>

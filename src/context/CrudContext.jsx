@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import {
   collection,
   addDoc,
@@ -24,7 +24,46 @@ const CrudProvider = ({ children }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [postLimit, setPostLimit] = useState(6);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { user } = useAuth();
+
+  const visiblePosts = useMemo(() => posts.slice(0, postLimit), [posts, postLimit]);
+  const hasMorePosts = posts.length > visiblePosts.length;
+
+  const loadMorePosts = useCallback(() => {
+    setPostLimit((prevLimit) => {
+      const nextLimit = Math.min(prevLimit + 6, posts.length);
+      return prevLimit === nextLimit ? prevLimit : nextLimit;
+    });
+  }, [posts.length]);
+
+  useEffect(() => {
+    if (loading || isFetchingMore || !hasMorePosts) return;
+
+    const handleScroll = () => {
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const threshold = document.documentElement.scrollHeight - 300;
+
+      if (scrollPosition >= threshold) {
+        setIsFetchingMore(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, isFetchingMore, hasMorePosts]);
+
+  useEffect(() => {
+    if (!isFetchingMore) return;
+
+    const timer = window.setTimeout(() => {
+      loadMorePosts();
+      setIsFetchingMore(false);
+    }, 600);
+
+    return () => window.clearTimeout(timer);
+  }, [isFetchingMore, loadMorePosts]);
 
   /**
    * The `submitPost` function in JavaScript React handles submitting a new post with user
@@ -204,10 +243,7 @@ const CrudProvider = ({ children }) => {
   };
 
   const getCommentsForPost = (postId) => {
-    const q = query(
-      collection(db, "posts", postId, "comments"),
-      orderBy("createdAt", "desc")
-    );
+    const q = query(collection(db, "posts", postId, "comments"), orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const commentsData = snapshot.docs.map((doc) => ({
@@ -225,7 +261,11 @@ const CrudProvider = ({ children }) => {
       value={{
         submitPost,
         posts,
+        visiblePosts,
         loading,
+        hasMorePosts,
+        isFetchingMore,
+        loadMorePosts,
         deletePost,
         isSubmitting,
         getPost,

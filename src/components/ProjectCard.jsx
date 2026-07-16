@@ -64,7 +64,7 @@ const TechStackDisplay = ({ techStack }) => {
   );
 };
 
-const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId, likeCount }) => {
+const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId, likeCount, commentCount }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { toggleUpvote, checkIfUserLiked } = useCrud();
@@ -112,7 +112,7 @@ const ProjectCard = ({ projectTitle, projectUrl, techStack, postId, userId, like
         </button>
         <button className="cursor-pointer flex items-center gap-2 text-gray-400">
           <FaComment />
-          <p>15</p>
+          <p>{commentCount || 0}</p>
         </button>
       </div>
 
