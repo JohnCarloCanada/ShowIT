@@ -1,0 +1,261 @@
+import React, { useEffect, useState } from "react";
+import { IoCloseSharp } from "react-icons/io5";
+import { db } from "../db/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useForm } from "react-hook-form";
+import { useCrud } from "../context/CrudContext";
+
+const EditModalCard = ({ isOpen, onClose, postId, optionsClose }) => {
+  const [post, setPost] = useState({ techStack: [] });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const { getPost, isSubmitting, updatePost } = useCrud();
+
+  const techStackOptions = ["React", "Firebase", "Python", "JavaScript", "TypeScript", "Node.js", "Vue", "Angular"];
+
+  const handleTechStack = (tech) => {
+    setPost((prev) => ({
+      ...prev,
+      techStack: prev.techStack.includes(tech) ? prev.techStack.filter((t) => t !== tech) : [...prev.techStack, tech],
+    }));
+  };
+
+  const handleCancel = () => {
+    onClose();
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      await updatePost({ postId: postId, ...data, techStack: [...post.techStack] });
+      optionsClose();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const postData = getPost(postId);
+    setPost({ techStack: [...postData.techStack] });
+
+    reset({
+      projectTitle: postData.projectTitle,
+      projectURL: postData.projectURL,
+      briefDescription: postData.briefDescription,
+    });
+  }, [postId, reset]);
+
+  // useEffect(() => {
+  //   // 1. Define the mounting flag
+  //   let isMounted = true;
+  //   const auth = getAuth();
+
+  //   const fetchPostData = async (uid) => {
+  //     try {
+  //       const postRef = doc(db, "posts", postId);
+  //       const postSnap = await getDoc(postRef);
+
+  //       // 2. CHECK the flag before updating state
+  //       if (isMounted) {
+  //         if (postSnap.exists() && postSnap.data().userId === uid) {
+  //           setPost({ id: postSnap.id, ...postSnap.data() });
+  //           reset({
+  //             projectTitle: postSnap.data().projectTitle,
+  //             projectURL: postSnap.data().projectURL,
+  //             briefDescription: postSnap.data().briefDescription,
+  //           });
+  //         } else {
+  //           setPost(null);
+  //         }
+  //         setLoading(false);
+  //       }
+  //     } catch (error) {
+  //       if (isMounted) {
+  //         console.error("Error fetching post:", error);
+  //         setLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   // 3. Handle Auth state safely
+  //   const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       fetchPostData(user.uid);
+  //     } else {
+  //       if (isMounted) setLoading(false);
+  //     }
+  //   });
+
+  //   // 4. THE CLEANUP FUNCTION
+  //   return () => {
+  //     isMounted = false; // Prevents any pending async logic from calling setState
+  //     unsubscribeAuth(); // Kills the Auth listener
+  //   };
+  // }, [postId, reset]);
+
+  if (!isOpen) return null;
+  if (!post) return <p>Post not found or unauthorized.</p>;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      {/* Modal Container */}
+      <div
+        className="bg-[#2a2a2c] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
+        role="dialog"
+        aria-labelledby="modal-title"
+        aria-modal="true"
+      >
+        {/* Close Button */}
+        <button
+          onClick={handleCancel}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+          aria-label="Close Edit project modal"
+        >
+          <IoCloseSharp size={24} />
+        </button>
+
+        {/* Modal Content */}
+        <div className="p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 id="modal-title" className="text-3xl font-bold text-white font-inter mb-2">
+              Edit your Project
+            </h1>
+            <p className="text-gray-400 font-inter">Fill out the details to share your work.</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Project Title */}
+            <div>
+              <label htmlFor="project-title" className="block text-sm font-medium text-gray-300 mb-2 font-inter">
+                Project Title
+              </label>
+              <input
+                id="project-title"
+                name="projectTitle"
+                type="text"
+                placeholder="e.g., Aero Dashboard Pro"
+                className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500"
+                aria-describedby="project-title-hint"
+                {...register("projectTitle", { required: "Project Title is required" })}
+              />
+              {errors.projectTitle && <span>{errors.projectTitle.message}</span>}
+              <p id="project-title-hint" className="sr-only">
+                Enter a descriptive title for your project
+              </p>
+            </div>
+
+            {/* Tech Stack */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3 font-inter">Tech Stack</label>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Technology stack selection">
+                {techStackOptions.map((tech) => {
+                  return (
+                    <button
+                      key={tech}
+                      onClick={() => handleTechStack(tech)}
+                      type="button"
+                      className={`px-3 py-2 rounded-lg font-inter text-sm font-medium transition-all duration-200 ${
+                        post.techStack.includes(tech)
+                          ? "bg-blue-600 text-white ring-2 ring-blue-400"
+                          : "bg-[#323943] text-gray-300 hover:bg-[#3a4451] hover:text-white"
+                      }`}
+                      aria-pressed={`${post.techStack.includes(tech)}`}
+                      aria-label={`${tech}${post.techStack.includes(tech) ? ", Selected" : ""}`}
+                    >
+                      {tech}
+                      <span className="ml-1" aria-hidden={true}>
+                        {post.techStack.includes(tech) ? "X" : ""}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500 mt-2 font-inter">
+                Selected: {post.techStack.length === 0 ? "None" : post.techStack.join(", ")}
+              </p>
+            </div>
+
+            {/* Project URL */}
+            <div>
+              <label htmlFor="project-url" className="block text-sm font-medium text-gray-300 mb-2 font-inter">
+                Project URL
+              </label>
+              <input
+                id="project-url"
+                name="projectURL"
+                type="url"
+                placeholder="https://yourproject.com"
+                className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500"
+                aria-describedby="project-url-hint"
+                {...register("projectURL", {
+                  required: "Project URL is required",
+                  pattern: {
+                    value: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+                    message: "Must start https/http",
+                  },
+                })}
+              />
+              {errors.projectURL && <span>{errors.projectURL.message}</span>}
+              <p id="project-url-hint" className="sr-only">
+                Enter the live URL of your project
+              </p>
+            </div>
+
+            {/* Brief Description */}
+            <div>
+              <label htmlFor="brief-description" className="block text-sm font-medium text-gray-300 mb-2 font-inter">
+                Brief Description
+              </label>
+              <textarea
+                id="brief-description"
+                name="briefDescription"
+                placeholder="A short summary of your project..."
+                rows="4"
+                className="w-full bg-[#323943] border border-gray-600 rounded-lg py-3 px-4 text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-500 resize-none"
+                aria-describedby="description-hint"
+                {...register("briefDescription", {
+                  required: "Description is required",
+                })}
+              />
+              <p id="description-hint" className="sr-only">
+                Provide a brief description of what your project does
+              </p>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex gap-3 justify-end pt-6 border-t border-gray-700">
+              <button
+                onClick={handleCancel}
+                type="button"
+                className="px-6 py-3 rounded-full bg-gray-700 text-white font-medium font-inter hover:bg-gray-600 active:bg-gray-800 transition-colors"
+                aria-label="Cancel project edit"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-purple-500 text-white font-bold font-inter hover:from-purple-700 hover:to-purple-600 active:from-purple-800 active:to-purple-700 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Publish project"
+              >
+                {isSubmitting ? "Submitting" : "Publish Project"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditModalCard;

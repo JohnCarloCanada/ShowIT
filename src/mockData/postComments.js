@@ -1,0 +1,62 @@
+export const mockComments = {
+  "1": [
+    {
+      id: "c1",
+      userName: "Alex Chen",
+      userImage: "https://i.pravatar.cc/150?img=1",
+      content: "This is super clean! The UI looks polished. What styling framework did you use?",
+      timestamp: "2 hours ago",
+      upvotes: 8,
+      replies: [],
+    },
+    {
+      id: "c2",
+      userName: "Sarah Smith",
+      userImage: "https://i.pravatar.cc/150?img=2",
+      content: "Really love the dark theme. Performance seems great too!",
+      timestamp: "1 hour ago",
+      upvotes: 5,
+      replies: [],
+    },
+    {
+      id: "c3",
+      userName: "Mike Johnson",
+      userImage: "https://i.pravatar.cc/150?img=3",
+      content: "How did you handle the state management? Would love to know more about your architecture.",
+      timestamp: "45 min ago",
+      upvotes: 3,
+      replies: [],
+    },
+  ],
+  "2": [
+    {
+      id: "c4",
+      userName: "Emma Wilson",
+      userImage: "https://i.pravatar.cc/150?img=4",
+      content: "The animations are smooth! Did you use Framer Motion?",
+      timestamp: "3 hours ago",
+      upvotes: 12,
+      replies: [],
+    },
+    {
+      id: "c5",
+      userName: "David Brown",
+      userImage: "https://i.pravatar.cc/150?img=5",
+      content: "Great work! This inspired me to start my own project.",
+      timestamp: "1 hour ago",
+      upvotes: 6,
+      replies: [],
+    },
+  ],
+  "3": [
+    {
+      id: "c6",
+      userName: "Lisa Anderson",
+      userImage: "https://i.pravatar.cc/150?img=6",
+      content: "How many hours did this take you to build?",
+      timestamp: "30 min ago",
+      upvotes: 2,
+      replies: [],
+    },
+  ],
+};

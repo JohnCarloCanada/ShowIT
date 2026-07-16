@@ -17,7 +17,7 @@ const GoogleButton = () => {
 
   useEffect(() => {
     if (user != null) {
-      navigate("/home");
+      navigate("/");
     }
   }, [user]);
 
